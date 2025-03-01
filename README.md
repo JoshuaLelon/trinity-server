@@ -1,184 +1,234 @@
-# Trinity Journaling App Product Requirements Document
+# Trinity Journaling App Backend
 
-## 1. Executive Summary
-This journaling app is designed to help users develop a consistent journaling habit through scheduled notifications, voice-based input, and intelligent prompt management. The app guides the user through three key prompts—Desire, Gratitude, and Brag—by automatically initiating voice recording and dynamically adapting to the user's input. Journal entries are ultimately sent to Notion, ensuring users have an external, structured record of their daily reflections.
+This is the backend server for the Trinity Journaling App, designed to provide intelligent journal prompt classification, processing, and storage with Notion integration.
 
-## 2. Problem Statement & Objectives
-**Problem Statement:**  
-Many people struggle with maintaining a daily journaling habit due to time constraints, lack of motivation, or difficulty in organizing their thoughts. Users need an app that not only reminds them to journal but also simplifies the journaling process through voice input and intelligent guidance.
+## Features
 
-**Objectives:**
-- Ensure users receive timely reminders to journal each day.
-- Provide an intuitive interface that minimizes friction by auto-starting voice recording.
-- Utilize AI to adaptively switch prompts or refine questions when users are stuck.
-- Seamlessly store entries in Notion, enabling users to track their progress over time.
-- Lay a robust foundation for future feature enhancements.
+- **AI-Powered Prompt Classification**: Intelligently classifies user responses into the correct prompt type (Gratitude, Desire, or Brag)
+- **Dynamic Prompt Switching**: Detects when a user is responding to a different prompt and switches context accordingly
+- **Prompt Refinement**: Offers guidance when users are stuck on a response
+- **Response Formatting**: Cleanly formats user responses for improved readability
+- **Notion Integration**: Stores journal entries in a structured Notion database
 
-## 3. User Personas & Use Cases
-**User Personas:**
-- **Busy Professional:**  
-  Needs quick, voice-based journaling during a hectic day. Values simplicity and automated prompts.
-- **Self-Improver:**  
-  Enjoys daily reflection and seeks insights into personal growth. Prefers a guided, adaptive journaling experience.
-- **Tech-Savvy Organizer:**  
-  Uses multiple apps to manage life and productivity. Prefers integration with tools like Notion for centralized note-keeping.
+## Technology Stack
 
-**Use Cases:**
-- **Morning Routine:**  
-  The user receives a notification at 8 AM, opens the app, and begins a voice journaling session.
-- **Flexible Session Management:**  
-  The app auto-starts recording, transcribes speech, and, if needed, refines the prompt based on voice input.
-- **Notion Integration:**  
-  Completed entries for Desire, Gratitude, and Brag are automatically formatted and sent to the user's Notion daily note.
-- **Adaptive Interaction:**  
-  If the user mixes response types or indicates confusion, the app intelligently adapts, ensuring clarity and ease-of-use.
+- **FastAPI**: Modern, high-performance web framework for building APIs
+- **LangGraph**: Framework for building structured LLM workflows
+- **LangChain**: LLM application development framework
+- **Anthropic Claude 3.5 Sonnet**: Advanced LLM for intelligent response processing
+- **LangSmith**: Tracing and monitoring for LLM applications
+- **Notion API**: Integration for storing journal entries
 
-## 4. Feature Requirements
-- **Journaling Prompts:**  
-  - Three key prompts: Desire, Gratitude, Brag.
-  
-- **Voice Recording & Transcription:**  
-  - Automatic start of recording upon app launch.
-  - Real-time transcription using Apple's built-in speech-to-text API.
-  - Retry mechanism for failed transcriptions.
+## Architecture
 
-- **Notification Scheduling & Reminder Logic:**  
-  - Initial notification at 8 AM.
-  - Reminders every 30 minutes until 10 PM, if journaling remains incomplete.
-  - Intelligent cessation of reminders upon journaling completion.
+The backend follows a simple but effective design based on the principles outlined in [Anthropic's article on building effective agents](https://www.anthropic.com/research/building-effective-agents):
 
-- **Notion API Integration:**  
-  - Map each journaling prompt to corresponding fields in the Notion daily note.
-  - Confirmation messages upon successful upload; error handling for connectivity issues.
+1. **Simple Building Blocks**: We use a straightforward workflow pattern where each step has a clearly defined purpose
+2. **Transparency**: Each step in the processing pipeline is traceable and explainable
+3. **Well-Documented Tools**: The Notion integration and LLM interactions are carefully documented
 
-- **AI-Powered Prompt Classification & Switching:**  
-  - Use an AI engine to classify voice responses.
-  - Dynamically switch or refine prompts based on detected content.
-  - Format transcriptions to remove filler words and improve readability.
+## Getting Started
 
-## 5. User Experience (UX) & Interface (UI) Design
-**Visual Style & Branding:**
-- **Color Palette:**  
-  - Background: White (#FFFFFF)  
-  - Primary Accent: iOS Blue (#007AFF)  
-  - Text: Dark Gray (#333333)
+### Prerequisites
 
-- **Typography:**  
-  - Use San Francisco font (default for iOS).  
-  - Headings at 20pt, bold; body text at 16pt regular; real-time transcription at 18pt for clarity.
+- Anaconda or Miniconda
+- Notion account with API access
+- Anthropic API key
+- LangSmith account (optional, for tracing)
 
-- **Layout & Components:**  
-  - Clean, minimal design with generous white space.
-  - Card-style views with rounded corners for displaying prompts and transcriptions.
-  - Use SF Symbols for icons (e.g., microphone for recording, checkmarks for completion).
-  - Interactive buttons (e.g., "Retry", "Save") with subtle shadow effects and animations (e.g., fade, slide transitions).
+### Environment Setup
 
-**Interaction Flow:**
-- User opens the app and sees a clear, card-based prompt.
-- Auto-initiated voice recording with a progress indicator.
-- Real-time transcription appears on-screen with options to edit, retry, or save.
-- Success and error modals are used to confirm actions (styled with green accents for success and red for errors).
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/trinity-server.git
+   cd trinity-server
+   ```
 
-## 6. Technical Architecture & Design Patterns
-**Tech Stack:**
-- **Frontend:**  
-  - iOS app built in Swift using either UIKit or SwiftUI.
-  - Apple's Speech Framework for transcription.
-  - Local Notifications for reminders.
+2. Create a conda environment:
+   ```bash
+   conda create -n trinity python=3.11
+   conda activate trinity
+   ```
 
-- **Backend:**  
-  - FastAPI (Python) hosted on AWS EC2 for handling AI logic and acting as a proxy for Notion API calls.
-  - LangGraph for building the workflow that handles prompt classification, switching, and refinement
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-- **Third-Party Integrations:**  
-  - Notion API for storing journal entries.
-  - OpenAI API (or similar) for AI-powered prompt classification and text formatting.
+4. Create a `.env` file based on the example:
+   ```bash
+   cp .env.example .env
+   ```
 
-**Design Patterns:**
-- **MVC (Model-View-Controller):**  
-  - Clean separation of concerns between UI, business logic, and data storage.
-- **Singleton:**  
-  - For managing notifications and Notion API configurations.
-- **Observer:**  
-  - To update the UI in response to changes in the journaling state (e.g., new transcription).
-- **State Pattern:**  
-  - Manage journaling session states (Idle, Recording, Transcribing, Completed) for smooth UI transitions.
-- **Strategy & Chain of Responsibility:**  
-  - For AI classification, enabling different strategies to handle mixed inputs or unclear responses.
+5. Edit the `.env` file with your API keys and configuration.
 
-## 7. Data Model & API Contracts
-**Data Model:**
-```swift
-struct JournalEntry: Codable {
-    let date: String
-    let gratitude: [String]
-    let desire: [String]
-    let brag: [String]
-}
+### Running Locally
+
+Start the development server:
+```bash
+python run.py
 ```
 
-**API Contracts:**
-- **Notion Integration Request:**
-  ```json
-  POST /send_to_notion
-  {
-    "date": "2025-03-01",
-    "gratitude": ["I am grateful for my health."],
-    "desire": ["I want a new job."],
-    "brag": ["I completed a major project."]
-  }
+The API will be available at http://localhost:8000
+
+### Additional Setup Documentation
+
+For more detailed instructions, see the following docs:
+
+- [Getting Started Guide](getting_started.md) - Quick start guide for setting up the project
+- [Anaconda Setup Guide](anaconda_setup.md) - Detailed guide for using Anaconda
+- [Deployment Guide](deployment.md) - Instructions for deploying to EC2
+
+You can also use our automatic setup script:
+
+```bash
+# Make the script executable (if needed)
+chmod +x setup_trinity.sh
+
+# Run the setup script
+./setup_trinity.sh
+```
+
+## API Endpoints
+
+### Journal Processing
+
+- **POST** `/api/v1/journal/process`: Process a journal entry
+  - Request body:
+    ```json
+    {
+      "transcription": "I'm grateful for my family",
+      "current_prompt": "gratitude",
+      "completed_prompts": []
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "detected_prompt": "gratitude",
+      "prompt_changed": false,
+      "formatted_response": "I'm grateful for my family and their support.",
+      "needs_refinement": false,
+      "refinement_suggestion": null,
+      "saved_to_notion": true
+    }
+    ```
+
+### Health Check
+
+- **GET** `/api/v1/health`: Check server health
+
+## Deployment to EC2
+
+### Setup EC2 Instance
+
+1. Launch an EC2 instance with Amazon Linux 2 or Ubuntu
+2. Install Anaconda/Miniconda:
+   ```bash
+   # Download Miniconda
+   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+   
+   # Install Miniconda
+   bash ~/miniconda.sh -b -p $HOME/miniconda
+   
+   # Initialize conda
+   eval "$($HOME/miniconda/bin/conda shell.bash hook)"
+   
+   # Add conda to path permanently
+   echo 'export PATH="$HOME/miniconda/bin:$PATH"' >> ~/.bashrc
+   ```
+
+3. Set up the application:
+   ```bash
+   git clone https://github.com/your-username/trinity-server.git
+   cd trinity-server
+   conda create -n trinity python=3.11
+   conda activate trinity
+   pip install -r requirements.txt
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
+
+### Configure systemd Service
+
+Create a systemd service to run the application:
+
+1. Create a service file:
+   ```bash
+   sudo nano /etc/systemd/system/trinity-server.service
+   ```
+
+2. Add the following content:
+   ```
+   [Unit]
+   Description=Trinity Journaling App Backend
+   After=network.target
+
+   [Service]
+   User=ec2-user
+   WorkingDirectory=/home/ec2-user/trinity-server
+   # Set up conda environment
+   ExecStart=/bin/bash -c 'source /home/ec2-user/miniconda/bin/activate && conda activate trinity && python run.py'
+   Restart=always
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+3. Enable and start the service:
+   ```bash
+   sudo systemctl enable trinity-server
+   sudo systemctl start trinity-server
+   ```
+
+4. Check the status:
+   ```bash
+   sudo systemctl status trinity-server
+   ```
+
+### Configure Nginx (Optional)
+
+If you want to use Nginx as a reverse proxy:
+
+1. Install Nginx:
+   ```bash
+   sudo yum install nginx -y  # Amazon Linux
+   # or
+   sudo apt install nginx -y  # Ubuntu
+   ```
+
+2. Configure Nginx:
+   ```bash
+   sudo nano /etc/nginx/conf.d/trinity-server.conf
+   ```
+
+3. Add the following:
+   ```
+   server {
+       listen 80;
+       server_name your-domain.com;
+
+       location / {
+           proxy_pass http://localhost:8000;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+       }
+   }
+   ```
+
+4. Enable and start Nginx:
+   ```bash
+   sudo systemctl enable nginx
+   sudo systemctl start nginx
+   ```
+
+## Monitoring and Debugging
+
+- View logs using systemd:
+  ```bash
+  sudo journalctl -u trinity-server -f
   ```
-- **AI Classification Request:**
-  ```json
-  POST /classify_response
-  {
-    "text": "I am grateful for my health, but I also want a new job."
-  }
-  ```
-- **AI Classification Response:**
-  ```json
-  {
-    "prompt": "gratitude",
-    "formattedResponse": "I am grateful for my health. I also want a new job."
-  }
-  ```
-
-## 8. Milestones & Roadmap
-**Phase 1: Basic Local-Only Journaling App**
-- Set up Xcode project, configure permissions, and implement basic UI.
-- Integrate local notifications and Apple's Speech Framework.
-- Implement in-memory storage for journal entries.
-- [View detailed Phase 1 documentation](./docs/phase_1.md)
-
-**Phase 2: Auto-Start Recording & Improved UI**
-- Auto-start voice recording on app launch.
-- Enhance UI with real-time transcription, animated indicators, and edit options.
-- Implement retry logic for transcription errors.
-- [View detailed Phase 2 documentation](./docs/phase_2.md)
-
-**Phase 3: Notion Integration (Basic)**
-- Develop a Notion API client using a Facade pattern.
-- Map journal entries to Notion's daily note format.
-- Provide user feedback on successful uploads and error handling.
-- [View detailed Phase 3 documentation](./docs/phase_3.md)
-
-**Phase 4: AI-Powered Prompt Switching & Formatting**
-- Integrate AI for prompt classification via a backend endpoint.
-- Implement dynamic prompt switching and adaptive refinement.
-- Format responses using Strategy and Chain of Responsibility patterns.
-- [View detailed Phase 4 documentation](./docs/phase_4.md)
-
-## 9. Future Enhancements
-- **Enhanced Data Visualization:**  
-  Provide analytics and insights based on the user's journaling history (e.g., mood trends, recurring themes).
-- **Customizable Prompts:**  
-  Allow users to create or modify prompts based on their personal growth areas.
-- **Auto-Tagging & Sentiment Analysis:**  
-  Integrate additional AI features to auto-tag entries and perform sentiment analysis.
-- **Offline Capabilities:**  
-  Enable local storage and later syncing when internet connectivity is restored.
-- **Cross-Platform Support:**  
-  Develop web or Android versions of the app for a seamless cross-device journaling experience.
-
-## 10. Documentation Structure
-All diagrams for the project are stored in the `docs/diagrams/` directory for better organization and maintainability. Each phase documentation references these diagrams instead of embedding them directly.
+- Monitor LLM performance via the LangSmith dashboard
+- Check application health via the health endpoint
